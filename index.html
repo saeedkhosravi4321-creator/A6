@@ -1,0 +1,2087 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>کنترل پروژه ایستگاه A6</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: #EDEFF2; }
+  * { box-sizing: border-box; }
+  body { font-family: Vazirmatn, Tahoma, 'Segoe UI', Arial, sans-serif; }
+  #root { max-width: 480px; margin: 0 auto; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useMemo } = React;
+
+/* ---------------- design tokens ---------------- */
+const COLORS = {
+  navy: "#10233A", blueprint: "#2B5D8C", amber: "#E8A33D", green: "#3F8F5F",
+  paper: "#EDEFF2", paperWhite: "#F9FAFB", slate: "#5B7086", slateLight: "#8FA0B2",
+  ink: "#182430", danger: "#C1533D", border: "#D7DCE3",
+};
+function toPersianDigits(input) {
+  const map = {0:"۰",1:"۱",2:"۲",3:"۳",4:"۴",5:"۵",6:"۶",7:"۷",8:"۸",9:"۹"};
+  return String(input).replace(/[0-9]/g, d => map[d]);
+}
+function fmtPercent(v) {
+  if (v === null || v === undefined) return "—";
+  return toPersianDigits(Math.round(v)) + "٪";
+}
+
+/* ---------------- seed data (Claude updates these each time) ---------------- */
+const SEED_WBS = {
+ "statusDate": "2026-09-10",
+ "projectStart": "2025-01-15",
+ "projectFinish": "2027-05-17",
+ "overall": {
+  "name": "A6 ایستگاه",
+  "percent": 48.0,
+  "start": "2025-01-15",
+  "finish": "2027-05-17"
+ },
+ "groups": [
+  {
+   "name": "شروع",
+   "percent": 100.0,
+   "start": "2025-01-15",
+   "finish": "2025-01-15",
+   "isSummary": false
+  },
+  {
+   "name": "تحویل زمین ",
+   "percent": 100.0,
+   "start": "2025-01-15",
+   "finish": "2026-07-04",
+   "isSummary": true
+  },
+  {
+   "name": "ابلاغ نقشه های اجرایی",
+   "percent": 100.0,
+   "start": "2025-01-15",
+   "finish": "2025-01-15",
+   "isSummary": false
+  },
+  {
+   "name": "تجهیز کارگاه",
+   "percent": 72.0,
+   "start": "2025-01-15",
+   "finish": "2027-05-02",
+   "isSummary": true
+  },
+  {
+   "name": "تامین مصالح",
+   "percent": 79.0,
+   "start": "2025-01-15",
+   "finish": "2027-05-16",
+   "isSummary": true
+  },
+  {
+   "name": "رمپ و تونل دسترسی ایستگاه",
+   "percent": 100.0,
+   "start": "2025-02-05",
+   "finish": "2025-08-30",
+   "isSummary": true
+  },
+  {
+   "name": "هسته مرکزی ایستگاه",
+   "percent": 46.0,
+   "start": "2025-06-01",
+   "finish": "2027-05-03",
+   "isSummary": true
+  },
+  {
+   "name": "سازه های جانبی ایستگاه",
+   "percent": 36.0,
+   "start": "2025-08-31",
+   "finish": "2027-05-03",
+   "isSummary": true
+  },
+  {
+   "name": "برچیدن کارگاه",
+   "percent": 0.0,
+   "start": "2027-05-04",
+   "finish": "2027-05-17",
+   "isSummary": false
+  },
+  {
+   "name": "پایان",
+   "percent": 0.0,
+   "start": "2027-05-17",
+   "finish": "2027-05-17",
+   "isSummary": false
+  }
+ ],
+ "taskCount": 1226,
+ "resourceCount": 41
+};
+const SEED_DAILY = [
+ {
+  "sheet": "05.31",
+  "weekday": "شنبه",
+  "dateJalali": "1405/05/31",
+  "reportNo": 518,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "حفاری فوقانی تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 20,
+    "qtyNight": 20
+   },
+   {
+    "desc": "نصب قاب تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 1,
+    "qtyNight": 1
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری تعریض تیکت هال از سه راهی پاترول رو به سمت غرب",
+    "unit": "مترمکعب",
+    "qtyDay": 10,
+    "qtyNight": null
+   },
+   {
+    "desc": "پوکه گذاری تعریض تیکت هال از سه راهی پاترول رو به سمت غرب",
+    "unit": "مترمکعب",
+    "qtyDay": 4,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و شاتکریت تعریض تیکت هال از سه راهی پاترول رو به سمت غرب",
+    "unit": "مترمربع",
+    "qtyDay": null,
+    "qtyNight": 10
+   },
+   {
+    "desc": "تخریب پاترول رو",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "تخلیه آب کانال های مجاور",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری پایه قاب تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 10,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب پایه قاب تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 4,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت پایه قاب تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": null,
+    "qtyNight": 10
+   },
+   {
+    "desc": "قرائت نشست سنجی از سطح خیابان",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "قالب بندی دیوار شفت جنوب شرقی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "بسته بندی پوکه و انتقال به تعریض",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "بارگیری و انتقال خاک تعریض و تونل دسترسی",
+    "unit": "مترمکعب",
+    "qtyDay": 91,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "نشت آب در تونل دسترسی به سکو",
+   "نشت آب در تونل دسترسی به تیکت هال",
+   "توقف حفاری تعریض به سمت شرق بدلیل نشت آب"
+  ]
+ },
+ {
+  "sheet": "06.01",
+  "weekday": "یک‌شنبه",
+  "dateJalali": "1405/06/01",
+  "reportNo": 519,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "حفاری فوقانی تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 20,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب قاب تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 1,
+    "qtyNight": null
+   },
+   {
+    "desc": "تخریب پاترول رو",
+    "unit": "مترمربع",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری تعریض تیکت هال از سه راهی پاترول رو به سمت غرب",
+    "unit": "مترمکعب",
+    "qtyDay": 10,
+    "qtyNight": null
+   },
+   {
+    "desc": "پوکه گذاری تعریض تیکت هال از سه راهی پاترول رو به سمت غرب",
+    "unit": "مترمکعب",
+    "qtyDay": 4,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و شاتکریت تعریض تیکت هال از سه راهی پاترول رو به سمت غرب",
+    "unit": "مترمربع",
+    "qtyDay": 10,
+    "qtyNight": null
+   },
+   {
+    "desc": "جمع آوری ضایعات محل تعریض",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "تخلیه آب کانال های مجاور جمع آوری آب های سطحی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری کفبند تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب کفبند تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 6,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت کفبند تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": null,
+    "qtyNight": 20
+   },
+   {
+    "desc": "قرائت نشست سنجی از سطح خیابان",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "قالب بندی دیوار شفت جنوب شرقی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "بسته بندی پوکه و انتقال به تعریض",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "بارگیری و انتقال خاک تعریض و تونل دسترسی",
+    "unit": "مترمکعب",
+    "qtyDay": 91,
+    "qtyNight": null
+   },
+   {
+    "desc": "همگرایی سنجی تونل دسترسی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "آرماتوربندی فونداسیون شفت شمال غربی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "اجرای بتن پرکنند ه چاه تهویه تونل دسترسی به سکو",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری چاه تهویه تونل دسترسی به سکو",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "انتقال قاب از ستاد به کارگاه",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "نشت آب در تونل دسترسی به سکو",
+   "نشت آب در تونل دسترسی به تیکت هال",
+   "توقف حفاری تعریض به سمت شرق بدلیل نشت آب"
+  ]
+ },
+ {
+  "sheet": "06.02",
+  "weekday": "دوشنبه",
+  "dateJalali": "1405/06/02",
+  "reportNo": 520,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "مش بندی و اجرای شاتکریت تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت کفبند تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": 10,
+    "qtyNight": null
+   },
+   {
+    "desc": "آرماتوربندی فونداسیون شفت شمال غربی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "نشت آب در تونل دسترسی به سکو",
+   "نشت آب در تونل دسترسی به تیکت هال",
+   "توقف حفاری تعریض به سمت شرق بدلیل نشت آب"
+  ]
+ },
+ {
+  "sheet": "06.03",
+  "weekday": "سه‌شنبه",
+  "dateJalali": "1405/06/03",
+  "reportNo": 521,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "حفاری کفبند تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب کفبند تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 4,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت کفبند تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": null,
+    "qtyNight": 25
+   },
+   {
+    "desc": "آرماتوربندی فونداسیون شفت شمال غربی",
+    "unit": "تن",
+    "qtyDay": 1,
+    "qtyNight": null
+   },
+   {
+    "desc": "قرائت همگرایی سنجی تونل دسترسی به سکو",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "تکمیل چاه هواساز تونل دسترسی به سکو",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "تمیز کاری و تخلیه کانال های آب سطحی سطح خیابان",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "بارگیری و حمل خاک تعریض تیکت هال",
+    "unit": "مترمکعب",
+    "qtyDay": 140,
+    "qtyNight": null
+   },
+   {
+    "desc": "نظافت و پاکسازی محوطه کارگاه",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "توقف حفاری تعریض به سمت شرق بدلیل نشت آب",
+   "کندی فعالیت اجرایی بدلیل کمبود منابع مالی ناشی از عدم پرداخت مطالبات"
+  ]
+ },
+ {
+  "sheet": "06.04",
+  "weekday": "چهارشنبه",
+  "dateJalali": "1405/06/04",
+  "reportNo": 522,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "حفاری تاج تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب قاب تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 1,
+    "qtyNight": null
+   },
+   {
+    "desc": "آرماتوربندی فونداسیون شفت شمال غربی",
+    "unit": "تن",
+    "qtyDay": 1,
+    "qtyNight": null
+   },
+   {
+    "desc": "قرائت همگرایی سنجی تونل دسترسی به سکو",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "تمیز کاری و تخلیه کانال های آب سطحی سطح خیابان",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "بارگیری و حمل خاک تعریض تیکت هال",
+    "unit": "مترمکعب",
+    "qtyDay": 140,
+    "qtyNight": null
+   },
+   {
+    "desc": "نظافت و پاکسازی محوطه کارگاه",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "توقف حفاری تعریض به سمت شرق بدلیل نشت آب",
+   "کندی فعالیت اجرایی بدلیل کمبود منابع مالی ناشی از عدم پرداخت مطالبات"
+  ]
+ },
+ {
+  "sheet": "06.05",
+  "weekday": "پنج‌شنبه",
+  "dateJalali": "1405/06/05",
+  "reportNo": 523,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "مش بندی و اجرای شاتکریت قاب تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "آرماتوربندی فونداسیون شفت شمال غربی",
+    "unit": "تن",
+    "qtyDay": 1,
+    "qtyNight": null
+   },
+   {
+    "desc": "قالب بندی فونداسیون شفت شمال غربی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "جمع آوری ضایعات تعریض",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "تمیز کاری و تخلیه کانال های آب سطحی سطح خیابان",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "بارگیری و حمل خاک تعریض تیکت هال",
+    "unit": "مترمکعب",
+    "qtyDay": 147,
+    "qtyNight": null
+   },
+   {
+    "desc": "نظافت و پاکسازی محوطه کارگاه",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "توقف حفاری تعریض به سمت شرق بدلیل نشت آب",
+   "کندی فعالیت اجرایی بدلیل کمبود منابع مالی ناشی از عدم پرداخت مطالبات"
+  ]
+ },
+ {
+  "sheet": "06.06",
+  "weekday": "جمعه",
+  "dateJalali": "1405/06/06",
+  "reportNo": 524,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "حفاری پایه تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 10,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب پایه تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 5,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت پایه تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": null,
+    "qtyNight": 10
+   },
+   {
+    "desc": "جمع آوری ضایعات تعریض",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "تمیز کاری و تخلیه کانال های آب سطحی سطح خیابان",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "بارگیری و حمل خاک تعریض تیکت هال",
+    "unit": "مترمکعب",
+    "qtyDay": 210,
+    "qtyNight": null
+   },
+   {
+    "desc": "نظافت و پاکسازی محوطه کارگاه",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "بسته بندی پوکه",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "قرائت پین های نشست سنجی از سطح خیابان",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "توقف حفاری تعریض به سمت شرق بدلیل نشت آب",
+   "کندی فعالیت اجرایی بدلیل کمبود منابع مالی ناشی از عدم پرداخت مطالبات"
+  ]
+ },
+ {
+  "sheet": "06.07",
+  "weekday": "شنبه",
+  "dateJalali": "1405/06/07",
+  "reportNo": 525,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "بتن ریزی فونداسیون شفت شمال غربی",
+    "unit": "مترمکعب",
+    "qtyDay": 25,
+    "qtyNight": null
+   },
+   {
+    "desc": "بتن ریزی دیوارهای شفت جنوب شرقی",
+    "unit": "مترمکعب",
+    "qtyDay": 40,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب قاب تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 1,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": null,
+    "qtyNight": 15
+   },
+   {
+    "desc": "حفاری پایه قاب تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 10,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب پایه قاب تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 4,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت پایه قاب تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": null,
+    "qtyNight": 10
+   },
+   {
+    "desc": "قرائت پین های نشست سنجی از سطح خیابان",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری دیواره های تعریض به سمت غرب",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت دیواره های تعریض به سمت غرب",
+    "unit": "مترمربع",
+    "qtyDay": 20,
+    "qtyNight": null
+   },
+   {
+    "desc": "انتقال خاک های تعریض و تونل دسترسی به دپو خاک شفت ورودی شمالی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "توقف حفاری تعریض به سمت شرق بدلیل نشت آب",
+   "کندی فعالیت اجرایی بدلیل کمبود منابع مالی ناشی از عدم پرداخت مطالبات"
+  ]
+ },
+ {
+  "sheet": "06.08",
+  "weekday": "یک‌شنبه",
+  "dateJalali": "1405/06/08",
+  "reportNo": 526,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "کیورینگ بتن فونداسیون شفت شمال غربی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "کیورینگ بتن دیوارهای شفت جنوب شرقی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب قاب تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 1,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": null,
+    "qtyNight": 15
+   },
+   {
+    "desc": "حفاری پایه قاب تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 10,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب پایه قاب تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 4,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت پایه قاب تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": null,
+    "qtyNight": 10
+   },
+   {
+    "desc": "قرائت پین های نشست سنجی از سطح خیابان",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری دیواره های تعریض به سمت غرب",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت دیواره های تعریض به سمت غرب",
+    "unit": "مترمربع",
+    "qtyDay": 20,
+    "qtyNight": null
+   },
+   {
+    "desc": "انتقال خاک های تعریض و تونل دسترسی به دپو خاک شفت ورودی شمالی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "توقف حفاری تعریض به سمت شرق بدلیل نشت آب",
+   "کندی فعالیت اجرایی بدلیل کمبود منابع مالی ناشی از عدم پرداخت مطالبات"
+  ]
+ },
+ {
+  "sheet": "06.09",
+  "weekday": "دوشنبه",
+  "dateJalali": "1405/06/09",
+  "reportNo": 527,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "کیورینگ بتن فونداسیون شفت شمال غربی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "کیورینگ بتن دیوارهای شفت جنوب شرقی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب قاب تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 1,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": null,
+    "qtyNight": 15
+   },
+   {
+    "desc": "حفاری پایه قاب تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 10,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب پایه قاب تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 4,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت پایه قاب تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": null,
+    "qtyNight": 10
+   },
+   {
+    "desc": "قرائت پین های نشست سنجی از سطح خیابان",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری دیواره های تعریض به سمت غرب",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت دیواره های تعریض به سمت غرب",
+    "unit": "مترمربع",
+    "qtyDay": 20,
+    "qtyNight": null
+   },
+   {
+    "desc": "انتقال خاک های تعریض و تونل دسترسی به دپو خاک شفت ورودی شمالی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "بارگیری و حمل خاک به خارج از کارگاه",
+    "unit": "مترمکعب",
+    "qtyDay": 140,
+    "qtyNight": null
+   },
+   {
+    "desc": "نظافت کارگاه",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "انتقال ضایعات خارج از کارگاه",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "توقف حفاری تعریض به سمت شرق بدلیل نشت آب",
+   "کندی فعالیت اجرایی بدلیل کمبود منابع مالی ناشی از عدم پرداخت مطالبات"
+  ]
+ },
+ {
+  "sheet": "06.10",
+  "weekday": "سه‌شنبه",
+  "dateJalali": "1405/06/10",
+  "reportNo": 528,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "کیورینگ بتن فونداسیون شفت شمال غربی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "کیورینگ بتن دیوارهای شفت جنوب شرقی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب قاب تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 1,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": null,
+    "qtyNight": 15
+   },
+   {
+    "desc": "قرائت پین های نشست سنجی از سطح خیابان",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری دیواره های تعریض به سمت غرب",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت دیواره های تعریض به سمت غرب",
+    "unit": "مترمربع",
+    "qtyDay": 20,
+    "qtyNight": null
+   },
+   {
+    "desc": "انتقال خاک های تعریض و تونل دسترسی به دپو خاک شفت ورودی شمالی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "بارگیری و حمل خاک به خارج از کارگاه",
+    "unit": "مترمکعب",
+    "qtyDay": 140,
+    "qtyNight": null
+   },
+   {
+    "desc": "نظافت کارگاه",
+    "unit": "مترمربع",
+    "qtyDay": 20,
+    "qtyNight": null
+   },
+   {
+    "desc": "انتقال ضایعات خارج از کارگاه",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "توقف حفاری تعریض به سمت شرق بدلیل نشت آب",
+   "کندی فعالیت اجرایی بدلیل کمبود منابع مالی ناشی از عدم پرداخت مطالبات"
+  ]
+ },
+ {
+  "sheet": "06.11",
+  "weekday": "چهارشنبه",
+  "dateJalali": "1405/06/11",
+  "reportNo": 529,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "کیورینگ بتن فونداسیون شفت شمال غربی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "کیورینگ بتن دیوارهای شفت جنوب شرقی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب قاب تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 1,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "قرائت پین های نشست سنجی از سطح خیابان",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری پایه تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 10,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب پایه تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 4,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت پایه تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": 10,
+    "qtyNight": null
+   },
+   {
+    "desc": "بارگیری و حمل خاک به خارج از کارگاه",
+    "unit": "مترمکعب",
+    "qtyDay": 84,
+    "qtyNight": null
+   },
+   {
+    "desc": "جمع آوری ضایعات تعریض",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "جابجایی مخزن آب کارگاه",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "کندی و توقف فعالیت اجرایی بدلیل کمبود منابع مالی ناشی از عدم پرداخت مطالبات"
+  ]
+ },
+ {
+  "sheet": "06.12",
+  "weekday": "پنج‌شنبه",
+  "dateJalali": "1405/06/12",
+  "reportNo": 530,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "کیورینگ بتن فونداسیون شفت شمال غربی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "کیورینگ بتن دیوارهای شفت جنوب شرقی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب قاب تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 1,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "قرائت پین های نشست سنجی از سطح خیابان",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری کفبند تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 12,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب کفبند تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 4,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت کفبند تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": 24,
+    "qtyNight": null
+   },
+   {
+    "desc": "بارگیری و حمل خاک از تیکت هال به خارج از کارگاه",
+    "unit": "مترمکعب",
+    "qtyDay": 98,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "کندی و توقف فعالیت اجرایی بدلیل کمبود منابع مالی ناشی از عدم پرداخت مطالبات"
+  ]
+ },
+ {
+  "sheet": "06.13",
+  "weekday": "جمعه",
+  "dateJalali": "1405/06/13",
+  "reportNo": 531,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "نظافت کارگاه",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "کندی و توقف فعالیت اجرایی بدلیل کمبود منابع مالی ناشی از عدم پرداخت مطالبات"
+  ]
+ },
+ {
+  "sheet": "06.14",
+  "weekday": "شنبه",
+  "dateJalali": "1405/06/14",
+  "reportNo": 532,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "کیورینگ بتن فونداسیون شفت شمال غربی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "کیورینگ بتن دیوارهای شفت جنوب شرقی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب قاب تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 1,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "قرائت پین های نشست سنجی از سطح خیابان",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری کفبند تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 12,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب کفبند تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 4,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت کفبند تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": 24,
+    "qtyNight": null
+   },
+   {
+    "desc": "بارگیری و حمل خاک از تیکت هال به خارج از کارگاه",
+    "unit": "مترمکعب",
+    "qtyDay": 91,
+    "qtyNight": null
+   },
+   {
+    "desc": "جمع آوری نخاله از کارگاه",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "کندی و توقف فعالیت اجرایی بدلیل کمبود منابع مالی ناشی از عدم پرداخت مطالبات"
+  ]
+ },
+ {
+  "sheet": "06.15",
+  "weekday": "یک‌شنبه",
+  "dateJalali": "1405/06/15",
+  "reportNo": 533,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "حفاری تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": 15
+   },
+   {
+    "desc": "نصب قاب تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 1,
+    "qtyNight": 1
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": 15,
+    "qtyNight": 15
+   },
+   {
+    "desc": "انتقال خاک از تونل دسترسی به دپو شفت ورودی شمالی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "نظافت و جمع آوری ضایعات کارگاه",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "کندی فعالیت اجرایی بدلیل کمبود منابع مالی ناشی از عدم پرداخت مطالبات"
+  ]
+ },
+ {
+  "sheet": "06.16",
+  "weekday": "دوشنبه",
+  "dateJalali": "1405/06/16",
+  "reportNo": 534,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "حفاری تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": 15
+   },
+   {
+    "desc": "نصب قاب تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 1,
+    "qtyNight": 1
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": 15,
+    "qtyNight": 15
+   },
+   {
+    "desc": "انتقال خاک از تونل دسترسی به دپو شفت ورودی شمالی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "نظافت و جمع آوری ضایعات کارگاه",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "کندی فعالیت اجرایی بدلیل کمبود منابع مالی ناشی از عدم پرداخت مطالبات"
+  ]
+ },
+ {
+  "sheet": "06.17",
+  "weekday": "سه‌شنبه",
+  "dateJalali": "1405/06/17",
+  "reportNo": 535,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "حفاری تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب قاب تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 1,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری پایه تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 10,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب پایه تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 4,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت پایه تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": 10,
+    "qtyNight": null
+   },
+   {
+    "desc": "جمع آوری لوله های بتن و تجهیزات از گالری راس",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "بارگیری و حمل خاک تونل دسترسی",
+    "unit": "مترمکعب",
+    "qtyDay": 98,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "کندی فعالیت اجرایی بدلیل کمبود منابع مالی ناشی از عدم پرداخت مطالبات"
+  ]
+ },
+ {
+  "sheet": "06.18",
+  "weekday": "چهارشنبه",
+  "dateJalali": "1405/06/18",
+  "reportNo": 536,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "حفاری تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب قاب تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 1,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری پایه تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 10,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب پایه تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 3,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت پایه تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": 10,
+    "qtyNight": null
+   },
+   {
+    "desc": "آماده سازی گالری راس جهت بتن ریزی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "بارگیری و حمل خاک تونل دسترسی",
+    "unit": "مترمکعب",
+    "qtyDay": 140,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "کندی فعالیت اجرایی بدلیل کمبود منابع مالی ناشی از عدم پرداخت مطالبات"
+  ]
+ },
+ {
+  "sheet": "06.19",
+  "weekday": "پنج‌شنبه",
+  "dateJalali": "1405/06/19",
+  "reportNo": 537,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "حفاری پایه تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 10,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب پایه تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 4,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت پایه تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": 10,
+    "qtyNight": null
+   },
+   {
+    "desc": "حفاری کفبند تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب کفبند تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 5,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت کفبند تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": 30,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "کندی فعالیت اجرایی بدلیل کمبود منابع مالی ناشی از عدم پرداخت مطالبات"
+  ]
+ },
+ {
+  "sheet": "06.20",
+  "weekday": "جمعه",
+  "dateJalali": "1405/06/20",
+  "reportNo": 538,
+  "siteStatus": "فعال",
+  "weatherStatus": "آفتابي",
+  "minTemp": 30,
+  "maxTemp": 44,
+  "manpower": {
+   "execTotal": 23,
+   "execPresent": 23,
+   "staffTotal": 18,
+   "staffPresent": 18
+  },
+  "activities": [
+   {
+    "desc": "حفاری پایه تونل دسترسی به سکو",
+    "unit": "مترمکعب",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "نصب پایه تونل دسترسی به سکو",
+    "unit": "عدد",
+    "qtyDay": 7,
+    "qtyNight": null
+   },
+   {
+    "desc": "مش بندی و اجرای شاتکریت پایه تونل دسترسی به سکو",
+    "unit": "مترمربع",
+    "qtyDay": 15,
+    "qtyNight": null
+   },
+   {
+    "desc": "همگرایی سنجی تونل دسترسی",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   },
+   {
+    "desc": "بتن ریزی چاه های حفاری شده در سطح خیابان",
+    "unit": null,
+    "qtyDay": null,
+    "qtyNight": null
+   }
+  ],
+  "issues": [
+   "کندی فعالیت اجرایی بدلیل کمبود منابع مالی ناشی از عدم پرداخت مطالبات"
+  ]
+ }
+];
+const SEED_WEEKLY = [
+ {
+  "reportNo": 75,
+  "periodFrom": "1405/06/13",
+  "periodTo": "1405/06/19",
+  "projectName": "پروژه احداث ایستگاه A06 (بیمارستان نکوئی) - خط A متروی قم",
+  "client": "شهرداری قم - سازمان قطار شهری قم",
+  "consultant": "شرکت مهندسین مشاور رهسازطرح",
+  "contractor": "شرکت نصیر عمران آریا",
+  "contractDate": "1403/10/26",
+  "initialDurationMonths": 28,
+  "landDelivery": "1403/10/26",
+  "sixMonthProgressPercent": 40,
+  "sixMonthAchievements": [
+   "حفاری و تحکیم 10 متر گالری پاترول",
+   "حفاری و تحکیم 65 متر گالری راس و 20 متر دستک",
+   "حفاری و تحکیم 60 متر گالری سرشمع",
+   "حفاری، آرماتوربندی و بتن‌ریزی 85 شمع سازه نگهبان ایستگاه",
+   "آرماتوربندی و بتن‌ریزی فونداسیون و آرماتوربندی دیوار شفت جنوب‌شرقی",
+   "حفاری، آرماتوربندی و بتن‌ریزی شمع‌های شفت هواساز نیم‌تونل شرقی",
+   "اجرای سه‌راهی تونل دسترسی",
+   "حفاری و تحکیم 35 متر طول تونل دسترسی به سکو",
+   "حفاری، قاب‌گذاری و تحکیم سه‌راهی پاترول رو و تعریض",
+   "حفاری، آرماتوربندی و بتن‌ریزی 48 ریب سازه نگهبان ایستگاه"
+  ],
+  "financial": {
+   "note": "ارقام دقیقاً همان‌طور که در گزارش پاورپوینت ارائه شده، با واحدهای ذکرشده در همان اسلاید، آورده شده است.",
+   "rialProgressToMordad1405": "2,283,664,393,345 ریال",
+   "contractorStatement": "1,838,471,619,983 ریال (صورت‌وضعیت پیمانکار)",
+   "consultantApproved": "1,125,569,266,565 ریال (تایید مشاور)",
+   "cumulativeAdjustmentKhordad": "927,972,702,567 ریال (تعدیل تجمعی - خرداد)",
+   "percent": 29.44,
+   "paidClaimsToOrdibehesht1405": "41.5 میلیارد تومان (مطالبات صورت‌وضعیت، ص.و16)",
+   "paidAdjustmentToFarvardin1405": "51 میلیارد تومان (مطالبات تعدیل، ص.و14)"
+  },
+  "sections": ["تعریض", "تونل دسترسی به سکو", "شفت شمال‌غربی", "شفت جنوب‌شرقی", "هواساز نیم‌تونل شرقی", "عملیات اجرایی ایستگاه A3"],
+  "issues": [
+   "توقف و کندی فعالیت اجرایی و نبود مصالح به‌دلیل کمبود شدید نقدینگی ناشی از انباشت مطالبات صورت‌وضعیت‌ها"
+  ]
+ }
+];
+const SEED_MONTHLY = [];
+/* Comments are managed the same way as the reports: send them to Claude
+   and they'll be added here on the next update. */
+const SEED_COMMENTS = {};
+const FEEDBACK_CONTACT = "پیام به مدیر پروژه";
+
+/* ---------------- tiny inline icons ---------------- */
+const IconBase = ({ children, size=18, color="currentColor" }) =>
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{children}</svg>;
+const IconDashboard = p => <IconBase {...p}><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></IconBase>;
+const IconClipboard = p => <IconBase {...p}><rect x="5" y="4" width="14" height="17" rx="1.5"/><path d="M9 4V3a1 1 0 011-1h4a1 1 0 011 1v1"/><path d="M9 11h6M9 15h6"/></IconBase>;
+const IconCalendarRange = p => <IconBase {...p}><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></IconBase>;
+const IconCalendarDays = p => <IconBase {...p}><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 14h.01M12 14h.01M16 14h.01"/></IconBase>;
+const IconWallet = p => <IconBase {...p}><path d="M3 7a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/><path d="M16 12h3"/></IconBase>;
+const IconAlert = p => <IconBase {...p}><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v4"/><circle cx="12" cy="17.2" r="0.6" fill={p.color||"currentColor"}/></IconBase>;
+const IconChevronDown = p => <IconBase {...p}><path d="M6 9l6 6 6-6"/></IconBase>;
+const IconChevronUp = p => <IconBase {...p}><path d="M18 15l-6-6-6 6"/></IconBase>;
+const IconMessage = p => <IconBase {...p}><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></IconBase>;
+const IconBuilding = p => <IconBase {...p}><rect x="4" y="3" width="12" height="18" rx="1"/><path d="M8 7h4M8 11h4M8 15h4"/><path d="M16 21h4V9l-4-2"/></IconBase>;
+
+function RulerDivider() {
+  return <div style={{ height:6, backgroundImage:`repeating-linear-gradient(90deg, ${COLORS.blueprint} 0 1px, transparent 1px 8px)`, opacity:0.35 }}/>;
+}
+function Card({ children, style }) {
+  return <div style={{ background:"#fff", border:`1px solid ${COLORS.border}`, borderRadius:8, padding:14, ...style }}>{children}</div>;
+}
+function SectionTitle({ icon, children }) {
+  return <div style={{ fontSize:13, fontWeight:700, marginBottom:10, display:"flex", alignItems:"center", gap:6 }}>{icon}{children}</div>;
+}
+function BarRow({ name, progress }) {
+  return (
+    <div>
+      <div style={{ display:"flex", justifyContent:"space-between", fontSize:12, color:COLORS.ink, marginBottom:4 }}>
+        <span>{name}</span><span style={{ color:COLORS.blueprint, fontWeight:700 }}>{fmtPercent(progress)}</span>
+      </div>
+      <div style={{ height:9, background:COLORS.paper, borderRadius:5, overflow:"hidden" }}>
+        <div style={{ height:"100%", width:`${progress||0}%`, background:COLORS.blueprint, borderRadius:5 }}/>
+      </div>
+    </div>
+  );
+}
+
+/* Static comments list — Claude adds new entries here on each update.
+   A viewer who wants to leave feedback is pointed to FEEDBACK_CONTACT. */
+function CommentsSection({ sectionKey }) {
+  const [open, setOpen] = useState(false);
+  const comments = SEED_COMMENTS[sectionKey] || [];
+  return (
+    <div style={{ borderTop:`1px solid ${COLORS.border}`, marginTop:10, paddingTop:10 }}>
+      <button onClick={()=>setOpen(o=>!o)}
+        style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", background:"none", border:"none", padding:0, cursor:"pointer", color:COLORS.slate, fontSize:12 }}>
+        <span style={{ display:"flex", alignItems:"center", gap:5 }}><IconMessage size={13}/>نظرات ({toPersianDigits(comments.length)})</span>
+        {open ? <IconChevronUp size={14}/> : <IconChevronDown size={14}/>}
+      </button>
+      {open && (
+        <div style={{ marginTop:8, display:"flex", flexDirection:"column", gap:8 }}>
+          {comments.length === 0 && <div style={{ fontSize:11.5, color:COLORS.slateLight }}>هنوز نظری ثبت نشده</div>}
+          {comments.map((c,i) => (
+            <div key={i} style={{ background:COLORS.paper, borderRadius:6, padding:"6px 9px" }}>
+              <div style={{ fontSize:10.5, color:COLORS.slate, marginBottom:2 }}>{c.author} · {c.date}</div>
+              <div style={{ fontSize:12.5, color:COLORS.ink }}>{c.text}</div>
+            </div>
+          ))}
+          <div style={{ fontSize:10.5, color:COLORS.slateLight }}>
+            برای ثبت نظر جدید: {FEEDBACK_CONTACT}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const TABS = [
+  { key:"overview", label:"کلی", Icon:IconDashboard },
+  { key:"daily", label:"روزانه", Icon:IconClipboard },
+  { key:"weekly", label:"هفتگی", Icon:IconCalendarRange },
+  { key:"monthly", label:"ماهانه", Icon:IconCalendarDays },
+  { key:"financial", label:"مالی", Icon:IconWallet },
+  { key:"issues", label:"موانع", Icon:IconAlert },
+];
+
+function OverviewTab() {
+  const wbs = SEED_WBS;
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+      <Card style={{ display:"flex", alignItems:"center", gap:18 }}>
+        <svg width={92} height={92} viewBox="0 0 92 92">
+          <circle cx={46} cy={46} r={38} fill="none" stroke={COLORS.border} strokeWidth={10}/>
+          <circle cx={46} cy={46} r={38} fill="none" stroke={COLORS.blueprint} strokeWidth={10}
+            strokeDasharray={2*Math.PI*38} strokeDashoffset={2*Math.PI*38*(1-(wbs.overall?.percent||0)/100)}
+            strokeLinecap="round" transform="rotate(-90 46 46)"/>
+          <text x={46} y={52} textAnchor="middle" fontSize={20} fontWeight={700} fill={COLORS.ink}>{fmtPercent(wbs.overall?.percent)}</text>
+        </svg>
+        <div>
+          <div style={{ fontSize:13.5, fontWeight:700 }}>پیشرفت کل پروژه</div>
+          <div style={{ fontSize:11.5, color:COLORS.slate, marginTop:4, lineHeight:1.8 }}>
+            بر اساس فایل زمان‌بندی · تاریخ وضعیت: {wbs.statusDate}<br/>
+            بازه پروژه: {wbs.projectStart} تا {wbs.projectFinish}
+          </div>
+        </div>
+      </Card>
+      <Card>
+        <SectionTitle>پیشرفت بخش‌های اصلی (WBS)</SectionTitle>
+        <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+          {wbs.groups.map((g,i) => <BarRow key={i} name={g.name.trim()} progress={g.percent}/>)}
+        </div>
+        <CommentsSection sectionKey="overview"/>
+      </Card>
+    </div>
+  );
+}
+
+function DailyTab() {
+  const [expanded, setExpanded] = useState(null);
+  const list = useMemo(() => [...SEED_DAILY].reverse(), []);
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+      {list.map(r => {
+        const isOpen = expanded === r.sheet;
+        return (
+          <Card key={r.sheet} style={{ padding:0, overflow:"hidden" }}>
+            <button onClick={()=>setExpanded(isOpen?null:r.sheet)}
+              style={{ width:"100%", display:"flex", justifyContent:"space-between", alignItems:"center", padding:"12px 14px", background:"none", border:"none", cursor:"pointer", textAlign:"right" }}>
+              <div>
+                <div style={{ fontSize:13, fontWeight:700 }}>{r.dateJalali} <span style={{ fontWeight:400, color:COLORS.slate, fontSize:11.5 }}>({r.weekday})</span></div>
+                <div style={{ fontSize:11, color:COLORS.slate, marginTop:2 }}>
+                  شماره گزارش {toPersianDigits(r.reportNo)} · نفرات: {toPersianDigits(r.manpower.execPresent + r.manpower.staffPresent)}
+                </div>
+              </div>
+              <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                {r.issues.length > 0 && <span style={{ fontSize:10.5, color:COLORS.amber, border:`1px solid ${COLORS.amber}`, borderRadius:4, padding:"1px 6px" }}>{toPersianDigits(r.issues.length)} مانع</span>}
+                {isOpen ? <IconChevronUp size={16} color={COLORS.slate}/> : <IconChevronDown size={16} color={COLORS.slate}/>}
+              </div>
+            </button>
+            {isOpen && (
+              <div style={{ padding:"0 14px 14px" }}>
+                <div style={{ display:"flex", gap:16, fontSize:12, color:COLORS.ink, marginBottom:10, flexWrap:"wrap" }}>
+                  <span>وضعیت کارگاه: {r.siteStatus}</span>
+                  <span>هوا: {r.weatherStatus}</span>
+                  <span>دما: {toPersianDigits(r.minTemp)}–{toPersianDigits(r.maxTemp)}°</span>
+                </div>
+                <div style={{ fontSize:12, color:COLORS.ink, marginBottom:10 }}>
+                  نیروی اجرایی: {toPersianDigits(r.manpower.execPresent)}/{toPersianDigits(r.manpower.execTotal)} حاضر ·
+                  {" "}نیروی ستادی: {toPersianDigits(r.manpower.staffPresent)}/{toPersianDigits(r.manpower.staffTotal)} حاضر
+                </div>
+                {r.activities.length > 0 && (
+                  <div style={{ marginBottom:10 }}>
+                    <div style={{ fontSize:11.5, fontWeight:700, color:COLORS.slate, marginBottom:5 }}>فعالیت‌های انجام‌شده</div>
+                    <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
+                      {r.activities.map((a,i) => (
+                        <div key={i} style={{ fontSize:12, color:COLORS.ink, display:"flex", justifyContent:"space-between", gap:8 }}>
+                          <span>{a.desc}</span>
+                          {a.unit && <span style={{ color:COLORS.blueprint, whiteSpace:"nowrap", fontSize:11 }}>{toPersianDigits((a.qtyDay||0)+(a.qtyNight||0))} {a.unit}</span>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {r.issues.length > 0 && (
+                  <div style={{ marginBottom:4 }}>
+                    <div style={{ fontSize:11.5, fontWeight:700, color:COLORS.amber, marginBottom:5 }}>موانع و مشکلات</div>
+                    <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
+                      {r.issues.map((iss,i) => <div key={i} style={{ fontSize:12, color:COLORS.ink }}>• {iss}</div>)}
+                    </div>
+                  </div>
+                )}
+                <CommentsSection sectionKey={`daily:${r.sheet}`}/>
+              </div>
+            )}
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
+function WeeklyTab() {
+  const list = SEED_WEEKLY;
+  if (list.length === 0) return <Card><div style={{ textAlign:"center", color:COLORS.slate, fontSize:13, padding:"20px 0" }}>هنوز گزارش هفتگی ثبت نشده</div></Card>;
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
+      {list.map(w => (
+        <Card key={w.reportNo}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
+            <div>
+              <div style={{ fontSize:14, fontWeight:700 }}>گزارش هفتگی شماره {toPersianDigits(w.reportNo)}</div>
+              <div style={{ fontSize:11.5, color:COLORS.slate, marginTop:2 }}>دوره: {w.periodFrom} تا {w.periodTo}</div>
+            </div>
+            <span style={{ fontSize:16, fontWeight:700, color:COLORS.blueprint }}>{fmtPercent(w.sixMonthProgressPercent)}</span>
+          </div>
+          <div style={{ fontSize:11.5, color:COLORS.ink, lineHeight:2, marginBottom:10 }}>
+            <div>کارفرما: {w.client}</div>
+            <div>مشاور: {w.consultant}</div>
+            <div>پیمانکار: {w.contractor}</div>
+            <div>ابلاغ قرارداد: {w.contractDate} · مدت اولیه: {toPersianDigits(w.initialDurationMonths)} ماه</div>
+          </div>
+          <div style={{ fontSize:11.5, fontWeight:700, color:COLORS.slate, marginBottom:5 }}>فعالیت‌های انجام‌شده (۶ ماه اخیر)</div>
+          <div style={{ display:"flex", flexDirection:"column", gap:4, marginBottom:10 }}>
+            {w.sixMonthAchievements.map((a,i) => <div key={i} style={{ fontSize:12, color:COLORS.ink }}>• {a}</div>)}
+          </div>
+          {w.issues.length > 0 && (
+            <div style={{ marginBottom:4 }}>
+              <div style={{ fontSize:11.5, fontWeight:700, color:COLORS.amber, marginBottom:5 }}>موانع و دلایل تأخیر</div>
+              {w.issues.map((iss,i) => <div key={i} style={{ fontSize:12, color:COLORS.ink }}>• {iss}</div>)}
+            </div>
+          )}
+          <CommentsSection sectionKey={`weekly:${w.reportNo}`}/>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function MonthlyTab() {
+  return (
+    <Card>
+      <div style={{ textAlign:"center", color:COLORS.slate, fontSize:13, padding:"20px 0" }}>
+        هنوز گزارش ماهانه‌ای ثبت نشده — وقتی اولین فایل ماهانه رو بفرستید، اینجا نمایش داده می‌شه
+      </div>
+      <CommentsSection sectionKey="monthly"/>
+    </Card>
+  );
+}
+
+function FinancialTab() {
+  const w = SEED_WEEKLY[0];
+  if (!w) return <Card><div style={{ textAlign:"center", color:COLORS.slate, fontSize:13, padding:"20px 0" }}>هنوز داده مالی ثبت نشده</div></Card>;
+  const f = w.financial;
+  const rows = [
+    ["پیشرفت ریالی پروژه (منتهی به مرداد ۱۴۰۵)", f.rialProgressToMordad1405],
+    ["صورت‌وضعیت پیمانکار", f.contractorStatement],
+    ["تایید مشاور", f.consultantApproved],
+    ["تعدیل تجمعی (خرداد)", f.cumulativeAdjustmentKhordad],
+    ["درصد پیشرفت ریالی", fmtPercent(f.percent)],
+    ["مطالبات صورت‌وضعیت", f.paidClaimsToOrdibehesht1405],
+    ["مطالبات تعدیل", f.paidAdjustmentToFarvardin1405],
+  ];
+  return (
+    <Card>
+      <SectionTitle icon={<IconWallet size={14} color={COLORS.green}/>}>وضعیت مالی پروژه</SectionTitle>
+      <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+        {rows.map(([label,val],i) => (
+          <div key={i} style={{ display:"flex", justifyContent:"space-between", gap:10, borderBottom:i<rows.length-1?`1px dashed ${COLORS.border}`:"none", paddingBottom:8 }}>
+            <span style={{ fontSize:12, color:COLORS.slate }}>{label}</span>
+            <span style={{ fontSize:12.5, color:COLORS.ink, fontWeight:700, textAlign:"left" }}>{toPersianDigits(val)}</span>
+          </div>
+        ))}
+      </div>
+      <div style={{ fontSize:10.5, color:COLORS.slateLight, marginTop:10 }}>{f.note}</div>
+      <CommentsSection sectionKey="financial"/>
+    </Card>
+  );
+}
+
+function IssuesTab() {
+  const items = useMemo(() => {
+    const list = [];
+    for (const r of SEED_DAILY) for (const iss of r.issues) list.push({ text:iss, date:r.dateJalali, source:"گزارش روزانه" });
+    for (const w of SEED_WEEKLY) for (const iss of w.issues) list.push({ text:iss, date:w.periodTo, source:`گزارش هفتگی ${toPersianDigits(w.reportNo)}` });
+    const grouped = {};
+    for (const it of list) {
+      if (!grouped[it.text]) grouped[it.text] = { text:it.text, count:0, lastDate:it.date, sources:new Set() };
+      grouped[it.text].count += 1; grouped[it.text].lastDate = it.date; grouped[it.text].sources.add(it.source);
+    }
+    return Object.values(grouped).sort((a,b) => b.count - a.count);
+  }, []);
+  return (
+    <Card>
+      <SectionTitle icon={<IconAlert size={14} color={COLORS.amber}/>}>موانع و مسائل باز (تجمیع‌شده)</SectionTitle>
+      <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+        {items.map((it,i) => (
+          <div key={i} style={{ borderTop:i>0?`1px solid ${COLORS.paper}`:"none", paddingTop:i>0?8:0 }}>
+            <div style={{ fontSize:13, color:COLORS.ink, marginBottom:3 }}>{it.text}</div>
+            <div style={{ fontSize:10.5, color:COLORS.slate }}>تکرار: {toPersianDigits(it.count)} بار · آخرین بار: {it.lastDate} · منبع: {[...it.sources].join("، ")}</div>
+          </div>
+        ))}
+      </div>
+      <CommentsSection sectionKey="issues"/>
+    </Card>
+  );
+}
+
+function App() {
+  const [tab, setTab] = useState("overview");
+  const TabContent = { overview:OverviewTab, daily:DailyTab, weekly:WeeklyTab, monthly:MonthlyTab, financial:FinancialTab, issues:IssuesTab }[tab];
+  return (
+    <div style={{ minHeight:"100vh", background:COLORS.paper, color:COLORS.ink, display:"flex", flexDirection:"column" }}>
+      <div style={{ background:COLORS.navy, color:"#fff", padding:"16px 16px 14px" }}>
+        <div style={{ fontSize:16, fontWeight:700 }}>کنترل پروژه ایستگاه A6</div>
+        <div style={{ fontSize:12, color:COLORS.slateLight, marginTop:3 }}>خط A متروی قم · تاریخ وضعیت: {SEED_WBS.statusDate}</div>
+      </div>
+      <RulerDivider/>
+      <div style={{ display:"flex", overflowX:"auto", background:COLORS.paperWhite, borderBottom:`1px solid ${COLORS.border}` }}>
+        {TABS.map(t => {
+          const { Icon } = t; const active = tab === t.key;
+          return (
+            <button key={t.key} onClick={()=>setTab(t.key)}
+              style={{ flex:"0 0 auto", display:"flex", flexDirection:"column", alignItems:"center", gap:3, padding:"9px 14px", border:"none", background:"none", borderBottom:active?`2px solid ${COLORS.blueprint}`:"2px solid transparent", color:active?COLORS.blueprint:COLORS.slate, fontWeight:active?700:400, fontSize:11, cursor:"pointer", whiteSpace:"nowrap" }}>
+              <Icon size={16}/>{t.label}
+            </button>
+          );
+        })}
+      </div>
+      <div style={{ flex:1, overflowY:"auto", padding:16, paddingBottom:24 }}>
+        <TabContent/>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
