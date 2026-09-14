@@ -37,89 +37,261 @@ function fmtPercent(v) {
 
 /* ---------------- seed data (Claude updates these each time) ---------------- */
 const SEED_WBS = {
- "statusDate": "2026-09-10",
- "projectStart": "2025-01-15",
- "projectFinish": "2027-05-17",
+ "statusDateJalali": "۱۹ شهریور ۱۴۰۵",
+ "projectStartJalali": "۲۶ دی ۱۴۰۳",
+ "projectFinishJalali": "۲۷ اردیبهشت ۱۴۰۶",
  "overall": {
   "name": "A6 ایستگاه",
-  "percent": 48.0,
-  "start": "2025-01-15",
-  "finish": "2027-05-17"
+  "percent": 27.7
  },
  "groups": [
   {
-   "name": "شروع",
-   "percent": 100.0,
-   "start": "2025-01-15",
-   "finish": "2025-01-15",
-   "isSummary": false
-  },
-  {
-   "name": "تحویل زمین ",
-   "percent": 100.0,
-   "start": "2025-01-15",
-   "finish": "2026-07-04",
-   "isSummary": true
-  },
-  {
-   "name": "ابلاغ نقشه های اجرایی",
-   "percent": 100.0,
-   "start": "2025-01-15",
-   "finish": "2025-01-15",
-   "isSummary": false
-  },
-  {
-   "name": "تجهیز کارگاه",
-   "percent": 72.0,
-   "start": "2025-01-15",
-   "finish": "2027-05-02",
-   "isSummary": true
-  },
-  {
-   "name": "تامین مصالح",
-   "percent": 79.0,
-   "start": "2025-01-15",
-   "finish": "2027-05-16",
-   "isSummary": true
-  },
-  {
    "name": "رمپ و تونل دسترسی ایستگاه",
-   "percent": 100.0,
-   "start": "2025-02-05",
-   "finish": "2025-08-30",
-   "isSummary": true
+   "percent": 92.6,
+   "children": [
+    {
+     "name": "رمپ دسترسی به ایستگاه",
+     "percent": 100.0,
+     "children": [
+      {
+       "name": "اجرای شمع های رمپ دسترسی",
+       "percent": 100.0
+      },
+      {
+       "name": "اجرای سرشمع و دال سقف رمپ دسترسی",
+       "percent": 100.0
+      },
+      {
+       "name": "حفاری رمپ دسترسی",
+       "percent": 100.0
+      },
+      {
+       "name": "تحکیم رمپ دسترسی",
+       "percent": 100.0
+      }
+     ]
+    },
+    {
+     "name": "تونل دسترسی به ایستگاه",
+     "percent": 90.4,
+     "children": [
+      {
+       "name": "اجرای تونل دسترسی پرتال تا تراز تیکت هال",
+       "percent": 100.0
+      },
+      {
+       "name": "اجرای سه راهی تونل دسترسی به سکو و تیکت هال",
+       "percent": 100.0
+      },
+      {
+       "name": "اجرای تونل دسترسی از سه راهی تا تراز سکو",
+       "percent": 77.0
+      }
+     ]
+    }
+   ]
   },
   {
    "name": "هسته مرکزی ایستگاه",
-   "percent": 46.0,
-   "start": "2025-06-01",
-   "finish": "2027-05-03",
-   "isSummary": true
+   "percent": 34.1,
+   "children": [
+    {
+     "name": "سازه نگهبان هسته مرکزی ایستگاه",
+     "percent": 74.3,
+     "children": [
+      {
+       "name": "اجرای سه راهی پاترول رو",
+       "percent": 100.0
+      },
+      {
+       "name": "گالری پاترول رو هسته مرکزی",
+       "percent": 100.0
+      },
+      {
+       "name": "شمع های هسته مرکزی",
+       "percent": 100.0
+      },
+      {
+       "name": "ریب های هسته مرکزی",
+       "percent": 98.5
+      },
+      {
+       "name": "عملیات حفاری و تعریض و تحکیم اولیه تیکت هال",
+       "percent": 43.0
+      },
+      {
+       "name": "عملیات حفاری و تخریب و حمل سگمنت و تحکیم اولیه سکو",
+       "percent": 0.0
+      }
+     ]
+    },
+    {
+     "name": "بدنه اصلی ایستگاه",
+     "percent": 0.0,
+     "children": [
+      {
+       "name": "طبقه تیکت هال",
+       "percent": 0.0
+      },
+      {
+       "name": "طبقه سکو",
+       "percent": 0.0
+      }
+     ]
+    }
+   ]
   },
   {
    "name": "سازه های جانبی ایستگاه",
-   "percent": 36.0,
-   "start": "2025-08-31",
-   "finish": "2027-05-03",
-   "isSummary": true
-  },
-  {
-   "name": "برچیدن کارگاه",
-   "percent": 0.0,
-   "start": "2027-05-04",
-   "finish": "2027-05-17",
-   "isSummary": false
-  },
-  {
-   "name": "پایان",
-   "percent": 0.0,
-   "start": "2027-05-17",
-   "finish": "2027-05-17",
-   "isSummary": false
+   "percent": 8.9,
+   "children": [
+    {
+     "name": "ورودی شمالی ایستگاه",
+     "percent": 6.5,
+     "children": [
+      {
+       "name": "شفت ورودی شمالی",
+       "percent": 10.9
+      },
+      {
+       "name": "گالری ورودی شمالی",
+       "percent": 0.0
+      },
+      {
+       "name": "اتاق پمپ و منبع آتشنشانی",
+       "percent": 0.0
+      }
+     ]
+    },
+    {
+     "name": "هواساز نیم تونل شرقی ایستگاه",
+     "percent": 15.4,
+     "children": [
+      {
+       "name": "فضای هواساز نیم تونل شرقی",
+       "percent": 18.2
+      },
+      {
+       "name": "گالری هوارسان هواساز نیم تونل شرقی",
+       "percent": 0.0
+      },
+      {
+       "name": "گالری های دسترسی هواساز نیم تونل شرقی",
+       "percent": 0.0
+      }
+     ]
+    },
+    {
+     "name": "دسترسی از طبقه تیکت هال به طبقه سکو ایستگاه",
+     "percent": 0.0,
+     "children": [
+      {
+       "name": "تقسیم مسافر شمالی",
+       "percent": 0.0
+      },
+      {
+       "name": "تقسیم مسافر جنوبی",
+       "percent": 0.0
+      }
+     ]
+    },
+    {
+     "name": "فضاهای مرتبط با توان ایستگاه",
+     "percent": 0.0,
+     "children": [
+      {
+       "name": "و اتاق برق و باطری و اطفا و فضای ذخیره شمالیLPS اتاق",
+       "percent": 0.0
+      },
+      {
+       "name": "و اتاق برق و باطری و اطفا و فضای ذخیره جنوبیLPS اتاق",
+       "percent": 0.0
+      }
+     ]
+    },
+    {
+     "name": "پست تخلیه فاضلاب ایستگاه",
+     "percent": 0.0,
+     "children": [
+      {
+       "name": "سازه پست تخلیه فاضلاب ایستگاه",
+       "percent": 0.0
+      },
+      {
+       "name": "نازک کاری پست تخلیه فاضلاب ایستگاه",
+       "percent": 0.0
+      },
+      {
+       "name": "الکتریکال پست تخلیه فاضلاب ایستگاه",
+       "percent": 0.0
+      },
+      {
+       "name": "مکانیکال پست تخلیه فاضلاب ایستگاه",
+       "percent": 0.0
+      }
+     ]
+    },
+    {
+     "name": "آسانسور و تهویه و خروج اضطراری شمال غربی ایستگاه",
+     "percent": 16.0,
+     "children": [
+      {
+       "name": "شفت شمال غربی",
+       "percent": 27.0
+      },
+      {
+       "name": "گالری خروج اضطراری شفت شمال غربی",
+       "percent": 0.0
+      },
+      {
+       "name": "گالری آسانسور معلولین شفت شمال غربی",
+       "percent": 0.0
+      },
+      {
+       "name": "گالری تهویه شفت شمال غربی",
+       "percent": 37.5
+      }
+     ]
+    },
+    {
+     "name": "تهویه و خروج اضطراری شمال شرقی ایستگاه",
+     "percent": 24.2,
+     "children": [
+      {
+       "name": "شفت شمال شرقی",
+       "percent": 46.9
+      },
+      {
+       "name": "گالری خروج اضطراری شفت شمال شرقی",
+       "percent": 0.0
+      },
+      {
+       "name": "گالری تهویه شفت شمال شرقی",
+       "percent": 0.0
+      }
+     ]
+    },
+    {
+     "name": "ورودی جنوبی ایستگاه",
+     "percent": 5.8,
+     "children": [
+      {
+       "name": "شفت ورودی جنوبی",
+       "percent": 10.0
+      },
+      {
+       "name": "گالری ورودی جنوبی",
+       "percent": 0.0
+      },
+      {
+       "name": "گالری تهویه فضای غیر عمومی",
+       "percent": 0.0
+      }
+     ]
+    }
+   ]
   }
- ],
- "taskCount": 1226,
- "resourceCount": 41
+ ]
 };
 const SEED_DAILY = [
  {
@@ -1772,6 +1944,87 @@ const SEED_WEEKLY = [
  }
 ];
 const SEED_MONTHLY = [];
+const SEED_SCURVE = {
+ "categories": [
+  "شروع",
+  "۱",
+  "۲",
+  "۳",
+  "۴",
+  "۵",
+  "۶",
+  "۷",
+  "۸",
+  "۹",
+  "۱۰",
+  "۱۱",
+  "۱۲",
+  "۱۳",
+  "۱۴",
+  "۱۵",
+  "۱۶",
+  "۱۷",
+  "۱۸",
+  "۱۹",
+  "۲۰",
+  "۲۱",
+  "۲۲",
+  "۲۳"
+ ],
+ "planned": [
+  0.0,
+  0.0261,
+  0.0446,
+  0.0694,
+  0.0941,
+  0.1226,
+  0.1524,
+  0.1848,
+  0.2129,
+  0.2497,
+  0.2777,
+  0.3104,
+  0.3432,
+  0.3709,
+  0.3971,
+  0.4281,
+  0.4567,
+  0.4787,
+  0.5021,
+  0.5296,
+  0.5577,
+  0.5798,
+  0.605,
+  0.6288
+ ],
+ "actual": [
+  0.0,
+  0.01,
+  0.0143,
+  0.0257,
+  0.0497,
+  0.0692,
+  0.0861,
+  0.1177,
+  0.1365,
+  0.1658,
+  0.1864,
+  0.205,
+  0.205,
+  0.229,
+  0.274,
+  0.2944,
+  0.3193,
+  0.342,
+  0.3683,
+  0.3758,
+  0.3816,
+  0.4011,
+  null,
+  null
+ ]
+};
+const SEED_HEADLINE = {"period": 1.92, "actual": 40.11, "planned": 57.33};
 /* Comments are managed the same way as the reports: send them to Claude
    and they'll be added here on the next update. */
 
@@ -1812,6 +2065,73 @@ function BarRow({ name, progress }) {
 }
 
 
+/* ---------------- S-curve (planned vs actual, from weekly PPT) ---------------- */
+function SCurveChart({ data }) {
+  const w = 300, h = 150, padL = 26, padR = 8, padT = 10, padB = 20;
+  const n = data.categories.length;
+  const stepX = (w - padL - padR) / (n - 1);
+  const toXY = (i, v) => [padL + i * stepX, padT + (h - padT - padB) * (1 - (v || 0))];
+  const pathFor = (arr) => {
+    let d = "";
+    arr.forEach((v, i) => {
+      if (v === null || v === undefined) return;
+      const [x, y] = toXY(i, v);
+      d += (d === "" ? "M" : "L") + x + "," + y + " ";
+    });
+    return d.trim();
+  };
+  return (
+    <svg width="100%" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet">
+      {[0, 0.25, 0.5, 0.75, 1].map((v) => {
+        const y = padT + (h - padT - padB) * (1 - v);
+        return (
+          <g key={v}>
+            <line x1={padL} x2={w - padR} y1={y} y2={y} stroke={COLORS.border} strokeDasharray="3 3" />
+            <text x={padL - 4} y={y + 3} fontSize="7" fill={COLORS.slate} textAnchor="end">{toPersianDigits(Math.round(v * 100))}</text>
+          </g>
+        );
+      })}
+      <path d={pathFor(data.planned)} fill="none" stroke={COLORS.slateLight} strokeWidth="2" strokeDasharray="4 3" />
+      <path d={pathFor(data.actual)} fill="none" stroke={COLORS.blueprint} strokeWidth="2.5" />
+      {data.categories.map((c, i) => (i % 4 === 0 ? (
+        <text key={i} x={padL + i * stepX} y={h - 4} fontSize="7" fill={COLORS.slate} textAnchor="middle">{c}</text>
+      ) : null))}
+    </svg>
+  );
+}
+
+/* ---------------- WBS tree (up to 3 levels, collapsible) ---------------- */
+function WbsNode({ node, depth }) {
+  const [open, setOpen] = useState(depth === 0);
+  const hasChildren = node.children && node.children.length > 0;
+  const sizes = [13, 12.5, 12];
+  const weights = [700, 600, 400];
+  return (
+    <div style={{ marginRight: depth * 12 }}>
+      <div
+        onClick={() => hasChildren && setOpen(o => !o)}
+        style={{ display: "flex", alignItems: "center", gap: 6, cursor: hasChildren ? "pointer" : "default", padding: "5px 0" }}
+      >
+        {hasChildren ? (open ? <IconChevronUp size={13} color={COLORS.slate} /> : <IconChevronDown size={13} color={COLORS.slate} />) : <span style={{ width: 13 }} />}
+        <div style={{ flex: 1 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: sizes[depth] || 11.5, fontWeight: weights[depth] || 400, color: COLORS.ink, marginBottom: 3 }}>
+            <span>{node.name}</span>
+            <span style={{ color: COLORS.blueprint, fontWeight: 700 }}>{fmtPercent(node.percent)}</span>
+          </div>
+          <div style={{ height: depth === 0 ? 8 : 6, background: COLORS.paper, borderRadius: 4, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${node.percent || 0}%`, background: depth === 0 ? COLORS.blueprint : COLORS.slateLight, borderRadius: 4 }} />
+          </div>
+        </div>
+      </div>
+      {hasChildren && open && (
+        <div style={{ borderRight: `1px solid ${COLORS.border}`, marginRight: 6 }}>
+          {node.children.map((c, i) => <WbsNode key={i} node={c} depth={depth + 1} />)}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const TABS = [
   { key:"overview", label:"کلی", Icon:IconDashboard },
   { key:"daily", label:"روزانه", Icon:IconClipboard },
@@ -1823,28 +2143,42 @@ const TABS = [
 
 function OverviewTab() {
   const wbs = SEED_WBS;
+  const h = SEED_HEADLINE;
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-      <Card style={{ display:"flex", alignItems:"center", gap:18 }}>
-        <svg width={92} height={92} viewBox="0 0 92 92">
-          <circle cx={46} cy={46} r={38} fill="none" stroke={COLORS.border} strokeWidth={10}/>
-          <circle cx={46} cy={46} r={38} fill="none" stroke={COLORS.blueprint} strokeWidth={10}
-            strokeDasharray={2*Math.PI*38} strokeDashoffset={2*Math.PI*38*(1-(wbs.overall?.percent||0)/100)}
-            strokeLinecap="round" transform="rotate(-90 46 46)"/>
-          <text x={46} y={52} textAnchor="middle" fontSize={20} fontWeight={700} fill={COLORS.ink}>{fmtPercent(wbs.overall?.percent)}</text>
-        </svg>
-        <div>
-          <div style={{ fontSize:13.5, fontWeight:700 }}>پیشرفت کل پروژه</div>
-          <div style={{ fontSize:11.5, color:COLORS.slate, marginTop:4, lineHeight:1.8 }}>
-            بر اساس فایل زمان‌بندی · تاریخ وضعیت: {wbs.statusDate}<br/>
-            بازه پروژه: {wbs.projectStart} تا {wbs.projectFinish}
+      <Card>
+        <div style={{ fontSize:12.5, color:COLORS.slate, marginBottom:10 }}>
+          تاریخ وضعیت: {wbs.statusDateJalali} · بازه پروژه: {wbs.projectStartJalali} تا {wbs.projectFinishJalali}
+        </div>
+        <div style={{ display:"flex", gap:10 }}>
+          <div style={{ flex:1, textAlign:"center", background:COLORS.paper, borderRadius:8, padding:"10px 4px" }}>
+            <div style={{ fontSize:20, fontWeight:700, color:COLORS.blueprint }}>{fmtPercent(h.actual)}</div>
+            <div style={{ fontSize:10.5, color:COLORS.slate, marginTop:2 }}>پیشرفت واقعی</div>
+          </div>
+          <div style={{ flex:1, textAlign:"center", background:COLORS.paper, borderRadius:8, padding:"10px 4px" }}>
+            <div style={{ fontSize:20, fontWeight:700, color:COLORS.slateLight }}>{fmtPercent(h.planned)}</div>
+            <div style={{ fontSize:10.5, color:COLORS.slate, marginTop:2 }}>پیشرفت برنامه‌ای</div>
+          </div>
+          <div style={{ flex:1, textAlign:"center", background:COLORS.paper, borderRadius:8, padding:"10px 4px" }}>
+            <div style={{ fontSize:20, fontWeight:700, color:COLORS.green }}>{fmtPercent(h.period)}</div>
+            <div style={{ fontSize:10.5, color:COLORS.slate, marginTop:2 }}>پیشرفت این دوره</div>
           </div>
         </div>
       </Card>
+
       <Card>
-        <SectionTitle>پیشرفت بخش‌های اصلی (WBS)</SectionTitle>
-        <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-          {wbs.groups.map((g,i) => <BarRow key={i} name={g.name.trim()} progress={g.percent}/>)}
+        <SectionTitle>نمودار پیشرفت برنامه اجرایی</SectionTitle>
+        <SCurveChart data={SEED_SCURVE}/>
+        <div style={{ display:"flex", gap:14, fontSize:10.5, color:COLORS.slate, marginTop:6, justifyContent:"center" }}>
+          <span style={{ display:"flex", alignItems:"center", gap:4 }}><span style={{ width:14, height:2, background:COLORS.blueprint, display:"inline-block" }}/>واقعی (تجمعی)</span>
+          <span style={{ display:"flex", alignItems:"center", gap:4 }}><span style={{ width:14, height:2, background:COLORS.slateLight, display:"inline-block", borderTop:`2px dashed ${COLORS.slateLight}` }}/>برنامه‌ای (تجمعی)</span>
+        </div>
+      </Card>
+
+      <Card>
+        <SectionTitle>پیشرفت بخش‌های اصلی</SectionTitle>
+        <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
+          {wbs.groups.map((g,i) => <WbsNode key={i} node={g} depth={0}/>)}
         </div>
       </Card>
     </div>
