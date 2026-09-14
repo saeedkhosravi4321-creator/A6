@@ -1774,8 +1774,6 @@ const SEED_WEEKLY = [
 const SEED_MONTHLY = [];
 /* Comments are managed the same way as the reports: send them to Claude
    and they'll be added here on the next update. */
-const SEED_COMMENTS = {};
-const FEEDBACK_CONTACT = "پیام به مدیر پروژه";
 
 /* ---------------- tiny inline icons ---------------- */
 const IconBase = ({ children, size=18, color="currentColor" }) =>
@@ -1813,35 +1811,6 @@ function BarRow({ name, progress }) {
   );
 }
 
-/* Static comments list — Claude adds new entries here on each update.
-   A viewer who wants to leave feedback is pointed to FEEDBACK_CONTACT. */
-function CommentsSection({ sectionKey }) {
-  const [open, setOpen] = useState(false);
-  const comments = SEED_COMMENTS[sectionKey] || [];
-  return (
-    <div style={{ borderTop:`1px solid ${COLORS.border}`, marginTop:10, paddingTop:10 }}>
-      <button onClick={()=>setOpen(o=>!o)}
-        style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", background:"none", border:"none", padding:0, cursor:"pointer", color:COLORS.slate, fontSize:12 }}>
-        <span style={{ display:"flex", alignItems:"center", gap:5 }}><IconMessage size={13}/>نظرات ({toPersianDigits(comments.length)})</span>
-        {open ? <IconChevronUp size={14}/> : <IconChevronDown size={14}/>}
-      </button>
-      {open && (
-        <div style={{ marginTop:8, display:"flex", flexDirection:"column", gap:8 }}>
-          {comments.length === 0 && <div style={{ fontSize:11.5, color:COLORS.slateLight }}>هنوز نظری ثبت نشده</div>}
-          {comments.map((c,i) => (
-            <div key={i} style={{ background:COLORS.paper, borderRadius:6, padding:"6px 9px" }}>
-              <div style={{ fontSize:10.5, color:COLORS.slate, marginBottom:2 }}>{c.author} · {c.date}</div>
-              <div style={{ fontSize:12.5, color:COLORS.ink }}>{c.text}</div>
-            </div>
-          ))}
-          <div style={{ fontSize:10.5, color:COLORS.slateLight }}>
-            برای ثبت نظر جدید: {FEEDBACK_CONTACT}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 const TABS = [
   { key:"overview", label:"کلی", Icon:IconDashboard },
@@ -1877,7 +1846,6 @@ function OverviewTab() {
         <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
           {wbs.groups.map((g,i) => <BarRow key={i} name={g.name.trim()} progress={g.percent}/>)}
         </div>
-        <CommentsSection sectionKey="overview"/>
       </Card>
     </div>
   );
@@ -1937,7 +1905,6 @@ function DailyTab() {
                     </div>
                   </div>
                 )}
-                <CommentsSection sectionKey={`daily:${r.sheet}`}/>
               </div>
             )}
           </Card>
@@ -1977,7 +1944,6 @@ function WeeklyTab() {
               {w.issues.map((iss,i) => <div key={i} style={{ fontSize:12, color:COLORS.ink }}>• {iss}</div>)}
             </div>
           )}
-          <CommentsSection sectionKey={`weekly:${w.reportNo}`}/>
         </Card>
       ))}
     </div>
@@ -1990,7 +1956,6 @@ function MonthlyTab() {
       <div style={{ textAlign:"center", color:COLORS.slate, fontSize:13, padding:"20px 0" }}>
         هنوز گزارش ماهانه‌ای ثبت نشده — وقتی اولین فایل ماهانه رو بفرستید، اینجا نمایش داده می‌شه
       </div>
-      <CommentsSection sectionKey="monthly"/>
     </Card>
   );
 }
@@ -2020,7 +1985,6 @@ function FinancialTab() {
         ))}
       </div>
       <div style={{ fontSize:10.5, color:COLORS.slateLight, marginTop:10 }}>{f.note}</div>
-      <CommentsSection sectionKey="financial"/>
     </Card>
   );
 }
@@ -2048,7 +2012,6 @@ function IssuesTab() {
           </div>
         ))}
       </div>
-      <CommentsSection sectionKey="issues"/>
     </Card>
   );
 }
