@@ -2024,7 +2024,7 @@ const SEED_SCURVE = {
   null
  ]
 };
-const SEED_HEADLINE = {"period": 1.92, "actual": 40.11, "planned": 57.33};
+const SEED_HEADLINE = {"master": {"actual": 27.746765559431942, "planned": 56.58646788467359}, "actionPlan": {"actual": 40.11, "planned": 57.33, "period": 1.92}};
 /* Comments are managed the same way as the reports: send them to Claude
    and they'll be added here on the next update. */
 
@@ -2146,28 +2146,43 @@ function OverviewTab() {
   const h = SEED_HEADLINE;
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+      <div style={{ fontSize:12, color:COLORS.slate, textAlign:"center" }}>
+        تاریخ وضعیت: {wbs.statusDateJalali} · بازه پروژه: {wbs.projectStartJalali} تا {wbs.projectFinishJalali}
+      </div>
       <Card>
-        <div style={{ fontSize:12.5, color:COLORS.slate, marginBottom:10 }}>
-          تاریخ وضعیت: {wbs.statusDateJalali} · بازه پروژه: {wbs.projectStartJalali} تا {wbs.projectFinishJalali}
-        </div>
+        <SectionTitle>پیشرفت واقعی — زمان‌بندی اصلی</SectionTitle>
         <div style={{ display:"flex", gap:10 }}>
           <div style={{ flex:1, textAlign:"center", background:COLORS.paper, borderRadius:8, padding:"10px 4px" }}>
-            <div style={{ fontSize:20, fontWeight:700, color:COLORS.blueprint }}>{fmtPercent(h.actual)}</div>
+            <div style={{ fontSize:20, fontWeight:700, color:COLORS.blueprint }}>{fmtPercent(h.master.actual)}</div>
             <div style={{ fontSize:10.5, color:COLORS.slate, marginTop:2 }}>پیشرفت واقعی</div>
           </div>
           <div style={{ flex:1, textAlign:"center", background:COLORS.paper, borderRadius:8, padding:"10px 4px" }}>
-            <div style={{ fontSize:20, fontWeight:700, color:COLORS.slateLight }}>{fmtPercent(h.planned)}</div>
+            <div style={{ fontSize:20, fontWeight:700, color:COLORS.slateLight }}>{fmtPercent(h.master.planned)}</div>
             <div style={{ fontSize:10.5, color:COLORS.slate, marginTop:2 }}>پیشرفت برنامه‌ای</div>
-          </div>
-          <div style={{ flex:1, textAlign:"center", background:COLORS.paper, borderRadius:8, padding:"10px 4px" }}>
-            <div style={{ fontSize:20, fontWeight:700, color:COLORS.green }}>{fmtPercent(h.period)}</div>
-            <div style={{ fontSize:10.5, color:COLORS.slate, marginTop:2 }}>پیشرفت این دوره</div>
           </div>
         </div>
       </Card>
 
       <Card>
-        <SectionTitle>نمودار پیشرفت برنامه اجرایی</SectionTitle>
+        <SectionTitle>پیشرفت — برنامه اکشن‌پلن</SectionTitle>
+        <div style={{ display:"flex", gap:10 }}>
+          <div style={{ flex:1, textAlign:"center", background:COLORS.paper, borderRadius:8, padding:"10px 4px" }}>
+            <div style={{ fontSize:20, fontWeight:700, color:COLORS.blueprint }}>{fmtPercent(h.actionPlan.actual)}</div>
+            <div style={{ fontSize:10.5, color:COLORS.slate, marginTop:2 }}>پیشرفت واقعی</div>
+          </div>
+          <div style={{ flex:1, textAlign:"center", background:COLORS.paper, borderRadius:8, padding:"10px 4px" }}>
+            <div style={{ fontSize:20, fontWeight:700, color:COLORS.slateLight }}>{fmtPercent(h.actionPlan.planned)}</div>
+            <div style={{ fontSize:10.5, color:COLORS.slate, marginTop:2 }}>پیشرفت برنامه‌ای</div>
+          </div>
+          <div style={{ flex:1, textAlign:"center", background:COLORS.paper, borderRadius:8, padding:"10px 4px" }}>
+            <div style={{ fontSize:20, fontWeight:700, color:COLORS.green }}>{fmtPercent(h.actionPlan.period)}</div>
+            <div style={{ fontSize:10.5, color:COLORS.slate, marginTop:2 }}>این دوره</div>
+          </div>
+        </div>
+      </Card>
+
+      <Card>
+        <SectionTitle>نمودار پیشرفت برنامه اجرایی (اکشن‌پلن)</SectionTitle>
         <SCurveChart data={SEED_SCURVE}/>
         <div style={{ display:"flex", gap:14, fontSize:10.5, color:COLORS.slate, marginTop:6, justifyContent:"center" }}>
           <span style={{ display:"flex", alignItems:"center", gap:4 }}><span style={{ width:14, height:2, background:COLORS.blueprint, display:"inline-block" }}/>واقعی (تجمعی)</span>
@@ -2176,7 +2191,7 @@ function OverviewTab() {
       </Card>
 
       <Card>
-        <SectionTitle>پیشرفت بخش‌های اصلی</SectionTitle>
+        <SectionTitle>پیشرفت بخش‌های اصلی <span style={{ fontSize:10.5, fontWeight:400, color:COLORS.slateLight }}>(زمان‌بندی اصلی)</span></SectionTitle>
         <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
           {wbs.groups.map((g,i) => <WbsNode key={i} node={g} depth={0}/>)}
         </div>
