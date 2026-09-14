@@ -2025,6 +2025,65 @@ const SEED_SCURVE = {
  ]
 };
 const SEED_HEADLINE = {"master": {"actual": 27.746765559431942, "planned": 56.58646788467359}, "actionPlan": {"actual": 40.11, "planned": 57.33, "period": 1.92}};
+const SEED_SECTIONS = [
+ {
+  "name": "تعریض",
+  "image": "assets/tarize.jpg",
+  "lastWeek": {
+   "actual": 43.0,
+   "planned": 47.4
+  },
+  "thisWeek": {
+   "actual": 43.0,
+   "planned": 52.0
+  }
+ },
+ {
+  "name": "تونل دسترسی به سکو",
+  "image": "assets/tunnel-dastresi.jpg",
+  "lastWeek": {
+   "actual": 68.0,
+   "planned": 67.5
+  },
+  "thisWeek": {
+   "actual": 77.0,
+   "planned": 71.0
+  }
+ },
+ {
+  "name": "شفت شمال‌غربی",
+  "image": "assets/shaft-nw.jpg",
+  "lastWeek": {
+   "actual": 9.5,
+   "planned": 100.0
+  },
+  "thisWeek": {
+   "actual": 9.5,
+   "planned": 60.0
+  }
+ },
+ {
+  "name": "شفت جنوب‌شرقی",
+  "image": "assets/shaft-se.jpg",
+  "lastWeek": {
+   "actual": 42.4,
+   "planned": 100.0
+  },
+  "thisWeek": {
+   "actual": 42.36,
+   "planned": 100.0
+  }
+ },
+ {
+  "name": "هواساز نیم‌تونل شرقی",
+  "image": null,
+  "current": {
+   "actual": 32.26,
+   "planned": 81.13
+  }
+ }
+];
+const SEED_A3 = {"actual": 55.0, "planned": 100.0};
 /* Comments are managed the same way as the reports: send them to Claude
    and they'll be added here on the next update. */
 
@@ -2283,9 +2342,52 @@ function WeeklyTab() {
             <div>پیمانکار: {w.contractor}</div>
             <div>ابلاغ قرارداد: {w.contractDate} · مدت اولیه: {toPersianDigits(w.initialDurationMonths)} ماه</div>
           </div>
-          <div style={{ fontSize:11.5, fontWeight:700, color:COLORS.slate, marginBottom:5 }}>فعالیت‌های انجام‌شده (۶ ماه اخیر)</div>
-          <div style={{ display:"flex", flexDirection:"column", gap:4, marginBottom:10 }}>
-            {w.sixMonthAchievements.map((a,i) => <div key={i} style={{ fontSize:12, color:COLORS.ink }}>• {a}</div>)}
+          <div style={{ fontSize:11.5, fontWeight:700, color:COLORS.slate, marginBottom:6 }}>پلان کلی فعالیت‌های اجرا شده</div>
+          <img src="assets/execution-plan.jpg" alt="پلان کلی فعالیت‌های اجرا شده" style={{ width:"100%", borderRadius:8, border:`1px solid ${COLORS.border}`, marginBottom:14 }}/>
+
+          <div style={{ fontSize:11.5, fontWeight:700, color:COLORS.slate, marginBottom:6 }}>سه‌بعدی پیشروی سازه نگهبان (4D)</div>
+          <img src="assets/4d-progress.jpg" alt="سه‌بعدی پیشروی سازه نگهبان" style={{ width:"100%", borderRadius:8, border:`1px solid ${COLORS.border}`, marginBottom:16 }}/>
+
+          <div style={{ fontSize:12.5, fontWeight:700, color:COLORS.ink, marginBottom:8 }}>پیشرفت به‌تفکیک بخش</div>
+          <div style={{ display:"flex", flexDirection:"column", gap:12, marginBottom:16 }}>
+            {SEED_SECTIONS.map((s,i) => (
+              <div key={i} style={{ border:`1px solid ${COLORS.border}`, borderRadius:8, padding:10 }}>
+                <div style={{ fontSize:12.5, fontWeight:700, color:COLORS.ink, marginBottom:8 }}>{s.name}</div>
+                {s.image && <img src={s.image} alt={s.name} style={{ width:"100%", borderRadius:6, marginBottom:8 }}/>}
+                {s.lastWeek ? (
+                  <div style={{ display:"flex", gap:8 }}>
+                    <div style={{ flex:1, background:COLORS.paper, borderRadius:6, padding:"7px 4px", textAlign:"center" }}>
+                      <div style={{ fontSize:10, color:COLORS.slate, marginBottom:3 }}>هفته گذشته</div>
+                      <div style={{ fontSize:13, fontWeight:700, color:COLORS.slateLight }}>{fmtPercent(s.lastWeek.actual)} <span style={{ fontSize:10, fontWeight:400 }}>واقعی</span></div>
+                      <div style={{ fontSize:10.5, color:COLORS.slate }}>برنامه: {fmtPercent(s.lastWeek.planned)}</div>
+                    </div>
+                    <div style={{ flex:1, background:COLORS.paper, borderRadius:6, padding:"7px 4px", textAlign:"center" }}>
+                      <div style={{ fontSize:10, color:COLORS.slate, marginBottom:3 }}>این هفته</div>
+                      <div style={{ fontSize:13, fontWeight:700, color:COLORS.blueprint }}>{fmtPercent(s.thisWeek.actual)} <span style={{ fontSize:10, fontWeight:400 }}>واقعی</span></div>
+                      <div style={{ fontSize:10.5, color:COLORS.slate }}>برنامه: {fmtPercent(s.thisWeek.planned)}</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display:"flex", gap:8 }}>
+                    <div style={{ flex:1, background:COLORS.paper, borderRadius:6, padding:"7px 4px", textAlign:"center" }}>
+                      <div style={{ fontSize:13, fontWeight:700, color:COLORS.blueprint }}>{fmtPercent(s.current.actual)} <span style={{ fontSize:10, fontWeight:400 }}>واقعی</span></div>
+                      <div style={{ fontSize:10.5, color:COLORS.slate }}>برنامه: {fmtPercent(s.current.planned)}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div style={{ fontSize:12.5, fontWeight:700, color:COLORS.ink, marginBottom:8 }}>عملیات اجرایی ایستگاه A3</div>
+          <div style={{ border:`1px solid ${COLORS.border}`, borderRadius:8, padding:10, marginBottom:4 }}>
+            <img src="assets/a3-schematic.jpg" alt="شماتیک A3" style={{ width:"100%", borderRadius:6, marginBottom:8 }}/>
+            <div style={{ display:"flex", gap:8 }}>
+              <div style={{ flex:1, background:COLORS.paper, borderRadius:6, padding:"7px 4px", textAlign:"center" }}>
+                <div style={{ fontSize:13, fontWeight:700, color:COLORS.blueprint }}>{fmtPercent(SEED_A3.actual)} <span style={{ fontSize:10, fontWeight:400 }}>واقعی</span></div>
+                <div style={{ fontSize:10.5, color:COLORS.slate }}>برنامه: {fmtPercent(SEED_A3.planned)}</div>
+              </div>
+            </div>
           </div>
           {w.issues.length > 0 && (
             <div style={{ marginBottom:4 }}>
