@@ -1928,16 +1928,23 @@ const SEED_WEEKLY = [
    "حفاری، آرماتوربندی و بتن‌ریزی 48 ریب سازه نگهبان ایستگاه"
   ],
   "financial": {
-   "note": "ارقام دقیقاً همان‌طور که در گزارش پاورپوینت ارائه شده، با واحدهای ذکرشده در همان اسلاید، آورده شده است.",
-   "rialProgressToMordad1405": "2,283,664,393,345 ریال",
-   "contractorStatement": "1,838,471,619,983 ریال (صورت‌وضعیت پیمانکار)",
-   "consultantApproved": "1,125,569,266,565 ریال (تایید مشاور)",
-   "cumulativeAdjustmentKhordad": "927,972,702,567 ریال (تعدیل تجمعی - خرداد)",
+   "note": "ارقام دقیقاً همان‌طور که در گزارش پاورپوینت ارائه شده آورده شده است.",
+   "contractorStatement": "2,283,664,393,345 ریال (منتهی به مرداد ۱۴۰۵)",
+   "consultantApproval": "1,838,471,619,983 ریال",
+   "cumulativeAdjustment": "1,125,569,266,565 ریال (تا خرداد)",
+   "claims": "927,972,702,567 ریال",
    "percent": 29.44,
-   "paidClaimsToOrdibehesht1405": "41.5 میلیارد تومان (مطالبات صورت‌وضعیت، ص.و16)",
-   "paidAdjustmentToFarvardin1405": "51 میلیارد تومان (مطالبات تعدیل، ص.و14)"
+   "paidClaimsToOrdibehesht1405": "41.5 میلیارد تومان (مطالبات صورت‌وضعیت، پرداخت شده تا ص.و ۱۶)",
+   "paidAdjustmentToFarvardin1405": "51 میلیارد تومان (مطالبات تعدیل، پرداخت شده تا ص.و ۱۴)"
   },
-  "sections": ["تعریض", "تونل دسترسی به سکو", "شفت شمال‌غربی", "شفت جنوب‌شرقی", "هواساز نیم‌تونل شرقی", "عملیات اجرایی ایستگاه A3"],
+  "sections": [
+   "تعریض",
+   "تونل دسترسی به سکو",
+   "شفت شمال‌غربی",
+   "شفت جنوب‌شرقی",
+   "هواساز نیم‌تونل شرقی",
+   "عملیات اجرایی ایستگاه A3"
+  ],
   "issues": [
    "توقف و کندی فعالیت اجرایی و نبود مصالح به‌دلیل کمبود شدید نقدینگی ناشی از انباشت مطالبات صورت‌وضعیت‌ها"
   ]
@@ -2064,7 +2071,7 @@ const SEED_SECTIONS = [
  },
  {
   "name": "شفت جنوب‌شرقی",
-  "image": "assets/shaft-se.jpg",
+  "image": null,
   "lastWeek": {
    "actual": 42.4,
    "planned": 100.0
@@ -2076,7 +2083,7 @@ const SEED_SECTIONS = [
  },
  {
   "name": "هواساز نیم‌تونل شرقی",
-  "image": null,
+  "image": "assets/aerator.jpg",
   "current": {
    "actual": 32.26,
    "planned": 81.13
@@ -2416,10 +2423,10 @@ function FinancialTab() {
   if (!w) return <Card><div style={{ textAlign:"center", color:COLORS.slate, fontSize:13, padding:"20px 0" }}>هنوز داده مالی ثبت نشده</div></Card>;
   const f = w.financial;
   const rows = [
-    ["پیشرفت ریالی پروژه (منتهی به مرداد ۱۴۰۵)", f.rialProgressToMordad1405],
     ["صورت‌وضعیت پیمانکار", f.contractorStatement],
-    ["تایید مشاور", f.consultantApproved],
-    ["تعدیل تجمعی (خرداد)", f.cumulativeAdjustmentKhordad],
+    ["تاییدی مشاور", f.consultantApproval],
+    ["تعدیل تجمعی (تا خرداد)", f.cumulativeAdjustment],
+    ["مطالبات", f.claims],
     ["درصد پیشرفت ریالی", fmtPercent(f.percent)],
     ["مطالبات صورت‌وضعیت", f.paidClaimsToOrdibehesht1405],
     ["مطالبات تعدیل", f.paidAdjustmentToFarvardin1405],
